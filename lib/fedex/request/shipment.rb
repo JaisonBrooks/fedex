@@ -49,11 +49,75 @@ module Fedex
           add_shipping_charges_payment(xml)
           add_special_services(xml) if @shipping_options[:return_reason] || @shipping_options[:cod] || @shipping_options[:saturday_delivery]
           add_customs_clearance(xml) if @customs_clearance_detail
+          # ETD CUSTOMERS SHIT; REQUIRED FOR COMMERIAL INVOICE GENERATION
+          add_etd_detail(xml) if @customs_clearance_detail
+          #
           add_custom_components(xml)
           xml.RateRequestTypes "ACCOUNT"
           add_packages(xml)
         }
       end
+
+=begin
+RequestedShippingDocumentType
+ CERTIFICATE_OF_ORIGIN
+ COMMERCIAL_INVOICE
+ CUSTOMER_SPECIFIED_LABELS
+ DANGEROUS_GOODS_SHIPPERS_DECLARATION
+ EXPORT_DECLARATION
+ GENERAL_AGENCY_AGREEMENT
+ LABEL
+ NAFTA_CERTIFICATE_OF_ORIGIN
+ PRO_FORMA_INVOICE
+ RETURN_INSTRUCTIONS
+
+ DocumentType
+enumeration CERTIFICATE_OF_ORIGIN
+enumeration COMMERCIAL_INVOICE
+enumeration ETD_LABEL
+enumeration NAFTA_CERTIFICATE_OF_ORIGIN
+enumeration OTHER
+enumeration PRO_FORMA_INVOICE
+
+Document Provider
+ CUSTOMER
+ FEDEX_CLS
+ FEDEX_GTM
+ OTHER
+
+DocumentIdProducer
+enumeration CUSTOMER
+enumeration FEDEX_CSHP
+enumeration FEDEX_GTM
+
+=end
+
+      # Electronic Trade Documents
+      def add_etd_detail(xml)
+        xml.ETDDetail{
+          xml.RequestedDocumentCopies{
+            ['COMMERCIAL_INVOICE', 'LABEL']
+              #xml.RequestedShippingDocumentType
+          }
+          # xml.Documents{
+          #   #[]
+          #   xml.LineNumber 1
+          #   xml.CustomerReference "THIS_IS_TEST"
+          #   xml.DocumentProducer "OTHER" #UploadDocumentProducerType
+          #   xml.DocumentType "CUSTOMER" #UploadDocumentType
+          #   xml.FileName "file_name.pdf"
+          #   # xml.DocumentContent
+          # }
+          # xml.DocumentReferences{
+          #   xml.LineNumber 1
+          #   xml.CustomerReference "THIS_IS_TEST"
+          #   xml.DocumentProvider "OTHER"
+          #   xml.DocumentType "CUSTOMER"
+          #   xml.DocumentIdProducer "CUSTOMER"
+          # }
+        }
+      end
+
 
       def add_total_weight(xml)
         if @mps.has_key? :total_weight

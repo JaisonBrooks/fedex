@@ -6,10 +6,9 @@ module Fedex
 
       def initialize(credentials, options={})
         requires!(options, :country_code, :request_type, :carrier_code)
-        @debug = ENV['DEBUG'] == 'true'
 
         @credentials = credentials
-        
+
         @country_code  = options[:country_code]
         @postal_code   = options[:postal_code] if options[:postal_code]
         @state_code    = options[:state_code] if options[:state_code]
@@ -20,7 +19,7 @@ module Fedex
 
       def process_request
         api_response = self.class.post(api_url, :body => build_xml)
-        puts api_response if @debug == true
+        puts api_response if @debug
         response = parse_response(api_response)
         if success?(response)
           success_response(api_response, response)

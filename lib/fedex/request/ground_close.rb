@@ -13,12 +13,11 @@ module Fedex
         @credentials = credentials
         @up_to_time = options[:up_to_time]
         @filename = options[:filename]
-        @debug = ENV['DEBUG'] == 'true'
       end
 
       def process_request
         api_response = self.class.post(api_url, :body => build_xml)
-        puts api_response if @debug == true
+        puts api_response if @debug
         response = parse_response(api_response)
         if success?(response)
           success_response(response)
@@ -41,7 +40,7 @@ module Fedex
           :manifest => response[:ground_close_reply][:manifest]
         }
         manifest = Fedex::GroundManifest.new(manifest_details)
-        puts "manifest written to #{filename}" if @debug == true
+        puts "manifest written to #{filename}" if @debug
         manifest
       end
 

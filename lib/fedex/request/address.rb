@@ -15,7 +15,7 @@ module Fedex
 
       def process_request
         api_response = self.class.post(api_url, :body => build_xml)
-        puts api_response if @debug == true
+        puts api_response if @debug
         response = parse_response(api_response)
         if success?(response)
           options = response[:address_validation_reply][:address_results][:proposed_address_details]
