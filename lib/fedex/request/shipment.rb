@@ -237,7 +237,7 @@ enumeration FEDEX_GTM
           }
         end
         output = builder.doc.root.to_xml
-        puts output if @debug
+        File.write("#{Time.now}.xml", output)
         output
       end
 
