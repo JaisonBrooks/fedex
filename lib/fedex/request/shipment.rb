@@ -47,11 +47,8 @@ module Fedex
           add_origin(xml) if @origin
           add_recipient(xml)
           add_shipping_charges_payment(xml)
-          add_special_services(xml) if @shipping_options[:return_reason] || @shipping_options[:cod] || @shipping_options[:saturday_delivery]
+          add_special_services(xml) if @shipping_options[:return_reason] || @shipping_options[:cod] || @shipping_options[:saturday_delivery] # || ETD
           add_customs_clearance(xml) if @customs_clearance_detail
-          # ETD CUSTOMERS SHIT; REQUIRED FOR COMMERIAL INVOICE GENERATION
-          add_etd_detail(xml) if @customs_clearance_detail
-          #
           add_custom_components(xml)
           xml.RateRequestTypes "ACCOUNT"
           add_packages(xml)
@@ -93,31 +90,30 @@ enumeration FEDEX_GTM
 =end
 
       # Electronic Trade Documents
-      def add_etd_detail(xml)
-        xml.ETDDetail{
-          xml.RequestedDocumentCopies{
-            ['COMMERCIAL_INVOICE', 'LABEL']
-              #xml.RequestedShippingDocumentType
-          }
-          # xml.Documents{
-          #   #[]
-          #   xml.LineNumber 1
-          #   xml.CustomerReference "THIS_IS_TEST"
-          #   xml.DocumentProducer "OTHER" #UploadDocumentProducerType
-          #   xml.DocumentType "CUSTOMER" #UploadDocumentType
-          #   xml.FileName "file_name.pdf"
-          #   # xml.DocumentContent
-          # }
-          # xml.DocumentReferences{
-          #   xml.LineNumber 1
-          #   xml.CustomerReference "THIS_IS_TEST"
-          #   xml.DocumentProvider "OTHER"
-          #   xml.DocumentType "CUSTOMER"
-          #   xml.DocumentIdProducer "CUSTOMER"
-          # }
-        }
-      end
-
+      # def add_etd_detail(xml)
+      #   xml.ETDDetail{
+      #     xml.RequestedDocumentCopies{
+      #       ['COMMERCIAL_INVOICE', 'LABEL']
+      #         #xml.RequestedShippingDocumentType
+      #     }
+      #     # xml.Documents{
+      #     #   #[]
+      #     #   xml.LineNumber 1
+      #     #   xml.CustomerReference "THIS_IS_TEST"
+      #     #   xml.DocumentProducer "OTHER" #UploadDocumentProducerType
+      #     #   xml.DocumentType "CUSTOMER" #UploadDocumentType
+      #     #   xml.FileName "file_name.pdf"
+      #     #   # xml.DocumentContent
+      #     # }
+      #     # xml.DocumentReferences{
+      #     #   xml.LineNumber 1
+      #     #   xml.CustomerReference "THIS_IS_TEST"
+      #     #   xml.DocumentProvider "OTHER"
+      #     #   xml.DocumentType "CUSTOMER"
+      #     #   xml.DocumentIdProducer "CUSTOMER"
+      #     # }
+      #   }
+      # end
 
       def add_total_weight(xml)
         if @mps.has_key? :total_weight
@@ -186,11 +182,37 @@ enumeration FEDEX_GTM
           if @shipping_options[:saturday_delivery]
             xml.SpecialServiceTypes "SATURDAY_DELIVERY"
           end
+          # xml.ShipmentSpecialServicesRequested{
+          #   xml.SpecialServiceTypes ['RETURN_SHIPMENT']
+          #   xml.EtdDetail{
+          #     xml.RequestedDocumentCopies{
+          #       ['COMMERCIAL_INVOICE', 'LABEL']
+          #         #xml.RequestedShippingDocumentType
+          #     }
+          #     # xml.Documents{
+          #     #   #[]
+          #     #   xml.LineNumber 1
+          #     #   xml.CustomerReference "THIS_IS_TEST"
+          #     #   xml.DocumentProducer "OTHER" #UploadDocumentProducerType
+          #     #   xml.DocumentType "CUSTOMER" #UploadDocumentType
+          #     #   xml.FileName "file_name.pdf"
+          #     #   # xml.DocumentContent
+          #     # }
+          #     # xml.DocumentReferences{
+          #     #   xml.LineNumber 1
+          #     #   xml.CustomerReference "THIS_IS_TEST"
+          #     #   xml.DocumentProvider "OTHER"
+          #     #   xml.DocumentType "CUSTOMER"
+          #     #   xml.DocumentIdProducer "CUSTOMER"
+          #     # }
+          #   }
+          # }
         }
       end
 
       # Callback used after a failed shipment response.
       def failure_response(api_response, response)
+        puts response
         error_message = if response[:process_shipment_reply]
           [response[:process_shipment_reply][:notifications]].flatten.first[:message]
         else
@@ -214,7 +236,9 @@ enumeration FEDEX_GTM
             add_requested_shipment(xml)
           }
         end
-        builder.doc.root.to_xml
+        output = builder.doc.root.to_xml
+        puts output if @debug
+        output
       end
 
       def service

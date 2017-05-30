@@ -52,7 +52,7 @@ module Fedex
         @credentials = credentials
         @shipper, @recipient, @packages, @service_type, @customs_clearance_detail = options[:shipper], options[:recipient], options[:packages], options[:service_type], options[:customs_clearance_detail]
         @origin = options[:origin]
-        @debug = (options[:mode] == 'development')
+        @debug = options[:debug] == true
         @shipping_options =  options[:shipping_options] ||={}
         @payment_options = options[:payment_options] ||={}
         requires!(@payment_options, :type, :account_number, :name, :company, :phone_number, :country_code) if @payment_options.length > 0
@@ -140,6 +140,21 @@ module Fedex
             xml.PostalCode @shipper[:postal_code]
             xml.CountryCode @shipper[:country_code]
           }
+          # TODO - Add Tins
+          # TaxpayerIdentification
+          #   TinType
+          #     BUSINESS_NATIONAL
+          #     BUSINESS_STATE
+          #     BUSINESS_UNION
+          #     PERSONAL_NATIONAL
+          #     PERSONAL_STATE
+          #   TinNumber
+          #     "EIN" ID
+          # xml.Tins {
+          #   xml.TinType 'BUSINESS_NATIONAL'
+          #   xml.Number "123456"
+          #   xml.Usage "USAGE OF TIN"
+          # }
         }
       end
 
