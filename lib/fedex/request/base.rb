@@ -52,7 +52,7 @@ module Fedex
         @credentials = credentials
         @shipper, @recipient, @packages, @service_type, @customs_clearance_detail = options[:shipper], options[:recipient], options[:packages], options[:service_type], options[:customs_clearance_detail]
         @origin = options[:origin]
-        @debug = options[:debug] == true
+        @debug = @credentials.mode != "production"
         @shipping_options =  options[:shipping_options] ||={}
         @payment_options = options[:payment_options] ||={}
         requires!(@payment_options, :type, :account_number, :name, :company, :phone_number, :country_code) if @payment_options.length > 0

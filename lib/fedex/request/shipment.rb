@@ -236,10 +236,8 @@ enumeration FEDEX_GTM
             add_requested_shipment(xml)
           }
         end
-        puts "DEBUG"
-        puts @debug
         output = builder.doc.root.to_xml
-        File.write("#{Time.now}.xml", output)
+        File.write("#{Time.now}.xml", output) if @debug
         output
       end
 
